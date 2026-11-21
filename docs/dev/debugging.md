@@ -23,12 +23,7 @@ NSE code do nothing while Xcode is attached to the app.
   "notifications stopped" can't send anything useful.
 - The NSE's logs are only visible while attached to `ntfyNSE`.
 
-**Contribution idea:** switch `Log` to Apple's unified logging (`os.Logger`, subsystem `io.heckel.ntfy`,
-categories per tag). Logs then show in Console.app for a connected device, survive without Xcode attached, and
-can be pulled with `log collect`. Android parity lists logging as missing, and roadmap 1A asks for errors to be
-surfaced. Check with Phil first. Small, testable, and it makes every later bug cheaper.
-
-Until then, to see device logs without Xcode: there aren't any. Attach Xcode.
+To see device logs without Xcode: there aren't any. Attach Xcode.
 
 ## Server-side visibility
 
@@ -56,11 +51,11 @@ A 429 from upstream means ntfy.sh is rate-limiting your relay. Set `upstream-acc
 - The server's `~poll` keepalive fallback is disabled [srv:server.go:2270], so nothing self-heals.
 - PR [#53](https://github.com/binwiederhier/ntfy-ios/pull/53) adds a reconcile on launch/activation plus a
   tracked topic set. When testing it, check: is a failed subscribe retried? Does reconcile run when the app is
-  only woken in the background? ([Q13](open-questions.md#q13--reconcile-on-background-wake))
+  only woken in the background? ([Q10](open-questions.md#q10--reconcile-on-background-wake))
 - Repro ideas: subscribe, then delete and reinstall the app (new token); toggle airplane mode during launch;
   restore from backup. Watch for `Firebase subscribe failed` in the console.
 - Hard to prove fixed on one device. A debug screen showing the current FCM token and last successful subscribe
-  time per topic would help users and you. Possible companion PR.
+  time per topic would help.
 
 ### #1945 — `message_delete` shows as a blank row
 - Server sends `message_delete`/`message_clear` as **silent** pushes [srv:server_firebase.go:147].

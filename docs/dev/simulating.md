@@ -9,10 +9,10 @@ Companion to [architecture.md](architecture.md). Same source tags.
 | App/NSE handling of each push type | free | `simctl push` fake payloads (below) |
 | Token-rotation / re-subscribe logic (#1305) | free | unit tests with FCM behind a protocol + a fake |
 | Polling and fetch-by-ID against a real server | free | simulator app + your own ntfy server |
-| Real end-to-end delivery FCM → APNs → phone | **paid Apple team** | Phil adds you to his team, or your own $99/yr account + your own Firebase |
+| Real end-to-end delivery FCM → APNs → phone | **paid Apple team** | membership in the team that owns `io.heckel.ntfy`, or your own $99/yr account + your own Firebase |
 | Simulator receiving *real* APNs pushes (Xcode 14+, Apple Silicon) | **paid Apple team** | still needs a push-enabled signing profile ([Q4](open-questions.md#q4--real-pushes-in-the-simulator)) |
 
-Firebase is free at any volume, including FCM ([Q11](open-questions.md#q11--fcm-cost)). The Firebase Local Emulator Suite does **not** emulate FCM
+Firebase is free at any volume, including FCM ([Q8](open-questions.md#q8--fcm-cost)). The Firebase Local Emulator Suite does **not** emulate FCM
 ([Q5](open-questions.md#q5--firebase-emulator-and-fcm)), so it doesn't help here.
 
 ## Fake pushes with `simctl push`
@@ -76,7 +76,7 @@ It must match the app's normalized base URL exactly: scheme, host and port, no t
 
 ## Your own ntfy server
 
-Docker on any Linux box or the Mac ( whether CI can run a server is [Q8](open-questions.md#q8--integration-tests-in-ci)):
+Docker on any Linux box or the Mac (whether CI can run a server is [Q7](open-questions.md#q7--integration-tests-in-ci)):
 
 ```bash
 docker run -d --name ntfy-dev -p 8095:80 \
@@ -134,5 +134,4 @@ Then test with a fake that records calls and can fail on demand:
 - a subscribe fails → retried later (today: it isn't)
 - subscription deleted → unsubscribed
 
-This is the part of the test/CI work that pays off directly for #1305 / PR #53. Agree the seam with
-Phil before refactoring `AppDelegate`, since PR #53 touches the same code.
+PR #53 touches the same `AppDelegate` code, so the seam should land with or after it.

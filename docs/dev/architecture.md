@@ -32,7 +32,7 @@ sequenceDiagram
     App->>App: FirebaseApp.configure() [ios:AppDelegate.swift:20]
     App->>APNs: registerForRemoteNotifications() [ios:AppDelegate.swift:30]
     APNs-->>App: Apple device token
-    App->>FCM: apnsToken = deviceToken [ios:AppDelegate.swift:142]
+    App->>FCM: apnsToken = deviceToken [ios:AppDelegate.swift:144]
     FCM-->>App: didReceiveRegistrationToken(fcmToken) [ios:AppDelegate.swift:241]
     App->>FCM: subscribe(toTopic: "~poll")
     loop each saved subscription
@@ -144,10 +144,10 @@ No server-side safety net: the `~poll` keepalive that would mask all three is of
 - **Core Data changes need a new model version** in Xcode (lightweight migration). The NSE reads the same store
   through App Group `group.io.heckel.ntfy`, so a bad migration breaks notifications too.
 - **Deployment target iOS 16+**, remove old `if #available` guards. The project file disagrees, see
-  [Q15](open-questions.md#q15--deployment-target).
+  [Q11](open-questions.md#q11--deployment-target).
 - **Critical Alerts entitlement** is already approved on Phil's team.
 - **Out of scope:** Apple Watch, custom sounds, `ntfy://` deep links, share extension, self-signed certs,
-  notification icons, MDM profiles, editing notifications ([Q17](open-questions.md#q17--out-of-scope-prs)).
+  notification icons, MDM profiles, editing notifications.
 
 ## See also
 
