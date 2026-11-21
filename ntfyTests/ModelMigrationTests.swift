@@ -21,11 +21,8 @@ struct ModelMigrationTests {
     }()
 
     private func openStore(at url: URL, model: NSManagedObjectModel) throws -> NSPersistentContainer {
-        let description = NSPersistentStoreDescription(url: url)
-        description.shouldMigrateStoreAutomatically = true
-        description.shouldInferMappingModelAutomatically = true
         let container = NSPersistentContainer(name: Store.modelName, managedObjectModel: model)
-        container.persistentStoreDescriptions = [description]
+        container.persistentStoreDescriptions = [NSPersistentStoreDescription(url: url)]
         var loadError: Error?
         container.loadPersistentStores { _, error in loadError = error }
         if let loadError {
@@ -43,13 +40,17 @@ struct ModelMigrationTests {
         #expect(Store.model.entitiesByName["Subscription"]?.attributesByName["customDisplayName"] != nil)
     }
 
+    /// Runs the same inferred (lightweight) migration the app relies on, with the source model passed in explicitly.
+    /// Automatic migration would load Model.mom from the bundle, briefly confusing entity lookups in parallel tests.
     @Test func storeFromFirstVersionMigratesToCurrent() throws {
+        let first = try #require(Self.firstVersion)
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let storeUrl = directory.appendingPathComponent("ntfy.sqlite")
+        let oldUrl = directory.appendingPathComponent("old.sqlite")
+        let migratedUrl = directory.appendingPathComponent("migrated.sqlite")
 
-        let old = try openStore(at: storeUrl, model: #require(Self.firstVersion))
+        let old = try openStore(at: oldUrl, model: first)
         let subscription = NSEntityDescription.insertNewObject(forEntityName: "Subscription", into: old.viewContext)
         subscription.setValue("https://ntfy.sh", forKey: "baseUrl")
         subscription.setValue("garage", forKey: "topic")
@@ -58,7 +59,13 @@ struct ModelMigrationTests {
             try old.persistentStoreCoordinator.remove(store)
         }
 
-        let migrated = try openStore(at: storeUrl, model: Store.model)
+        let mapping = try NSMappingModel.inferredMappingModel(forSourceModel: first, destinationModel: Store.model)
+        try NSMigrationManager(sourceModel: first, destinationModel: Store.model).migrateStore(
+            from: oldUrl, sourceType: NSSQLiteStoreType, options: nil, with: mapping,
+            toDestinationURL: migratedUrl, destinationType: NSSQLiteStoreType, destinationOptions: nil
+        )
+
+        let migrated = try openStore(at: migratedUrl, model: Store.model)
         let rows = try migrated.viewContext.fetch(NSFetchRequest<NSManagedObject>(entityName: "Subscription"))
         #expect(rows.count == 1)
         #expect(rows.first?.value(forKey: "topic") as? String == "garage")
