@@ -66,6 +66,9 @@ jobs:
 
       - name: Build and test (app, NSE and unit tests)
         run: |
+          # xcbeautify trims the raw xcodebuild log; the full log is in the uploaded TestResults.xcresult.
+          set -o pipefail
+          command -v xcbeautify >/dev/null || brew install xcbeautify
           # $SIGNING is intentionally unquoted so it splits into separate build settings.
           # shellcheck disable=SC2086
           xcodebuild test \
@@ -74,7 +77,7 @@ jobs:
             -destination "$DESTINATION" \
             -clonedSourcePackagesDirPath "$RUNNER_TEMP/SourcePackages" \
             -resultBundlePath TestResults.xcresult \
-            $SIGNING
+            $SIGNING | xcbeautify --renderer github-actions
 
       - name: Upload test results
         if: failure()
