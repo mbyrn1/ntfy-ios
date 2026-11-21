@@ -6,20 +6,19 @@ import Testing
 /// Existing users have stores written with older model versions. If one fails to load, Store only logs it and the
 /// app runs with no data, so every shipped version must migrate to the current one.
 struct ModelMigrationTests {
-    private static let firstVersion = "Model"
-
-    private func loadModel(_ url: URL) throws -> NSManagedObjectModel {
-        let model = try #require(NSManagedObjectModel(contentsOf: url))
-        // Generic objects only: a second model claiming Subscription etc. would confuse Store's entity lookups.
+    /// Loaded once and stripped of its subclasses before any store uses it: a second model claiming Subscription etc.
+    /// would confuse Store's entity lookups. The current version is always Store.model, never a second load.
+    private static let firstVersion: NSManagedObjectModel? = {
+        guard let url = Bundle(for: Store.self).url(forResource: Store.modelName, withExtension: "momd")?
+            .appendingPathComponent("Model.mom"),
+              let model = NSManagedObjectModel(contentsOf: url) else {
+            return nil
+        }
         for entity in model.entities {
             entity.managedObjectClassName = NSStringFromClass(NSManagedObject.self)
         }
         return model
-    }
-
-    private func modelDirectory() throws -> URL {
-        try #require(Bundle(for: Store.self).url(forResource: Store.modelName, withExtension: "momd"))
-    }
+    }()
 
     private func openStore(at url: URL, model: NSManagedObjectModel) throws -> NSPersistentContainer {
         let description = NSPersistentStoreDescription(url: url)
@@ -36,13 +35,12 @@ struct ModelMigrationTests {
     }
 
     @Test func firstVersionHasNoDisplayName() throws {
-        let first = try loadModel(modelDirectory().appendingPathComponent("\(Self.firstVersion).mom"))
+        let first = try #require(Self.firstVersion)
         #expect(first.entitiesByName["Subscription"]?.attributesByName["customDisplayName"] == nil)
     }
 
-    @Test func currentVersionHasDisplayName() throws {
-        let current = try loadModel(modelDirectory())
-        #expect(current.entitiesByName["Subscription"]?.attributesByName["customDisplayName"] != nil)
+    @Test func currentVersionHasDisplayName() {
+        #expect(Store.model.entitiesByName["Subscription"]?.attributesByName["customDisplayName"] != nil)
     }
 
     @Test func storeFromFirstVersionMigratesToCurrent() throws {
@@ -51,7 +49,7 @@ struct ModelMigrationTests {
         defer { try? FileManager.default.removeItem(at: directory) }
         let storeUrl = directory.appendingPathComponent("ntfy.sqlite")
 
-        let old = try openStore(at: storeUrl, model: loadModel(modelDirectory().appendingPathComponent("\(Self.firstVersion).mom")))
+        let old = try openStore(at: storeUrl, model: #require(Self.firstVersion))
         let subscription = NSEntityDescription.insertNewObject(forEntityName: "Subscription", into: old.viewContext)
         subscription.setValue("https://ntfy.sh", forKey: "baseUrl")
         subscription.setValue("garage", forKey: "topic")
@@ -60,7 +58,7 @@ struct ModelMigrationTests {
             try old.persistentStoreCoordinator.remove(store)
         }
 
-        let migrated = try openStore(at: storeUrl, model: loadModel(modelDirectory()))
+        let migrated = try openStore(at: storeUrl, model: Store.model)
         let rows = try migrated.viewContext.fetch(NSFetchRequest<NSManagedObject>(entityName: "Subscription"))
         #expect(rows.count == 1)
         #expect(rows.first?.value(forKey: "topic") as? String == "garage")

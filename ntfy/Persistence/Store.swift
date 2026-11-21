@@ -38,7 +38,7 @@ class Store: ObservableObject {
     private static let sharedDefaultsKeyCriticalAlertsAuthorized = "criticalAlertsAuthorized"
     // Loaded once and shared, so multiple stores (e.g. in-memory ones for previews and tests)
     // don't register duplicate entity descriptions for the same managed object subclasses.
-    private static let model: NSManagedObjectModel = {
+    static let model: NSManagedObjectModel = {
         guard let url = Bundle.main.url(forResource: Store.modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: url) else {
             fatalError("Cannot load Core Data model \(Store.modelName)")
