@@ -16,12 +16,15 @@ When it's answered, fill in **Answer**, set status to ✅ (confirmed) or ❌ (wr
 | Q6 | Do `simctl push` alert payloads run the NSE? | ❓ | local |
 | Q7 | Can Phil add you to his Apple team at no extra cost? | ❓ | phil |
 | Q8 | Can integration tests run an ntfy server on GitHub's macOS runners (no Docker)? | ❓ | local |
-| Q9 | CI vs. the missing `GoogleService-Info.plist`: placeholder, or skip Firebase under test? | ❓ | phil |
+| Q9 | CI vs. the missing `GoogleService-Info.plist`: placeholder, or skip Firebase under test? | ✅ | local |
 | Q10 | Why was the Markdown PR (#47) closed unmerged? | ❓ | phil |
 | Q11 | Is FCM free at any volume? | ❓ | research |
 | Q12 | Exactly what can a free (personal) Apple team sign: push? App Groups? | ❓ | local |
 | Q13 | Does PR #53's reconcile run when the app is only woken in the background? | ❓ | local |
 | Q14 | Who besides Phil is working on what (critical alerts, display names, UI modernize)? | ❓ | phil |
+| Q15 | What is the real deployment target: iOS 14/15 (project file), 16+ (roadmap) or 17 (PR #36)? | ❓ | local + phil |
+| Q16 | Did the community rewrite (`dehlen/ntfy-ios`, now gone) go anywhere? | ❓ | phil |
+| Q17 | Will Phil take PRs for items his roadmap lists as out of scope (#57 sounds, #51 deep links, #58 icons)? | ❓ | phil |
 
 ---
 
@@ -79,7 +82,10 @@ workflow and start `ntfy serve` on the runner.
 `AppDelegate` calls `FirebaseApp.configure()` at launch; with no plist the app crashes.
 **Options:** generate a dummy plist in the workflow; or skip `configure()` when running under tests.
 **Validate:** Phil's preference, then try the dummy plist locally first.
-**Answer:** —
+**Answer (2026-11-20):** placeholder works. `scripts/dummy-firebase-plist.sh` on branch `ci/lint-and-tests` writes a
+dummy plist; CI on macos-26 builds, launches the test host and passes 31 tests. Firebase only checks the API key is
+39 characters starting with "A". Don't start it with `AIza`: GitHub secret scanning flags that as a leaked Google
+key. Still worth confirming Phil is happy with the approach when the PR goes up.
 
 ### Q10 — Markdown PR #47
 Closed with no comments. Design disagreement, abandoned, or superseded? Affects any new Markdown work (#1072).
@@ -106,4 +112,23 @@ silent pushes), does reconcile run? Also: is a failed subscribe retried?
 ### Q14 — who's doing what
 Open PRs from several contributors overlap our task list. Avoid duplicate work.
 **Validate:** ask Phil in Discord before starting display names, Markdown, critical alerts, or a UI refresh.
+**Answer:** —
+
+### Q15 — deployment target
+Roadmap #1680 says "iOS 16+, remove `if #available(iOS 15, *)` guards". PR #36 "Bump to iOS 17" merged in April 2026.
+But `project.pbxproj` on `main` still has `IPHONEOS_DEPLOYMENT_TARGET = 14.0` (2 configs) and `15.0` (6 configs).
+**Validate:** check target-level vs project-level settings in Xcode and what #36 actually changed; ask Phil which
+minimum he wants. A clean-up PR (one target value plus removing dead availability checks) is small and on his list.
+**Answer:** —
+
+### Q16 — community rewrite
+Roadmap lists `github.com/dehlen/ntfy-ios` (started January 2026) as a data source. As of 2026-11-21 it returns 404:
+deleted or private. Matters before designing a reskin or larger refactor.
+**Answer:** —
+
+### Q17 — out-of-scope PRs
+Roadmap "Out of Scope": Apple Watch (#1546), custom sounds (#546), `ntfy://` deep links (#450), share extension,
+self-signed certs (#1439), notification icons (#507), MDM profiles (#477), editing notifications.
+Open PRs that implement some of these: #57 (sounds), #51 (deep links), #58 (icons + Live Activities).
+**Validate:** ask during PR triage. Either Phil changes scope or they get a polite close.
 **Answer:** —

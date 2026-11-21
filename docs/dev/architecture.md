@@ -136,6 +136,19 @@ No server-side safety net: the `~poll` keepalive that would mask all three is of
 - APNs rejects payloads over 4 KB — silently, the push never arrives (server comment) [srv:server_firebase.go:282-287].
 - Server caps the FCM JSON at 4000 bytes and truncates `message`, setting `truncated=1` [srv:server_firebase.go:220].
 
+## Project conventions (Phil's roadmap, [ntfy#1680](https://github.com/binwiederhier/ntfy/issues/1680))
+
+- **One commit/PR per feature.** Not one giant change.
+- **Update `docs/FEATURE_PARITY.md`** as features land. It was last updated 2023-05-23 and is stale: attachments
+  and actions are marked incomplete but exist now.
+- **Core Data changes need a new model version** in Xcode (lightweight migration). The NSE reads the same store
+  through App Group `group.io.heckel.ntfy`, so a bad migration breaks notifications too.
+- **Deployment target iOS 16+**, remove old `if #available` guards. The project file disagrees, see
+  [Q15](open-questions.md#q15--deployment-target).
+- **Critical Alerts entitlement** is already approved on Phil's team.
+- **Out of scope:** Apple Watch, custom sounds, `ntfy://` deep links, share extension, self-signed certs,
+  notification icons, MDM profiles, editing notifications ([Q17](open-questions.md#q17--out-of-scope-prs)).
+
 ## See also
 
 - [debugging.md](debugging.md) — logs, attaching to the NSE, bug leads
