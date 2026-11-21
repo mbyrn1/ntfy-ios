@@ -18,6 +18,18 @@ struct StoreTests {
         #expect(store.getSubscriptions()?.count == 1)
     }
 
+    /// Mirrors SubscriptionAddView, which saves the user and subscription from a background queue.
+    @Test func savesUserAndSubscriptionFromBackgroundQueue() async throws {
+        let store = self.store
+        await Task.detached {
+            store.saveUser(baseUrl: "https://example.com/", username: "phil", password: "secret")
+            _ = store.saveSubscription(baseUrl: "https://example.com/", topic: "alerts")
+        }.value
+
+        #expect(store.getUser(baseUrl: "https://example.com")?.username == "phil")
+        #expect(store.getSubscription(baseUrl: "https://example.com", topic: "alerts") != nil)
+    }
+
     @Test func savingSameMessageTwiceDoesNotDuplicate() throws {
         let subscription = store.saveSubscription(baseUrl: "https://example.com", topic: "alerts")
         store.save(notificationFromMessage: message("a"), withSubscription: subscription)

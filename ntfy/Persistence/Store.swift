@@ -112,8 +112,7 @@ class Store: ObservableObject {
     // MARK: Subscriptions
     
     func saveSubscription(baseUrl: String, topic: String) -> Subscription {
-        // Callers may be on a background queue, so the insert and save happen on the context's queue.
-        // The returned object still belongs to the (main-queue) view context.
+        // Callers may be on a background queue. Only touch the returned object on the main queue.
         context.performAndWait {
             let subscription = Subscription(context: context)
             subscription.baseUrl = normalizeBaseUrl(baseUrl)
@@ -247,15 +246,18 @@ class Store: ObservableObject {
     // MARK: Users
     
     func saveUser(baseUrl: String, username: String, password: String) {
-        do {
-            let user = getUser(baseUrl: baseUrl) ?? User(context: context)
-            user.baseUrl = normalizeBaseUrl(baseUrl)
-            user.username = username
-            user.password = password
-            try context.save()
-        } catch let error {
-            Log.w(Store.tag, "Cannot store user", error)
-            rollbackAndRefresh()
+        // Called from a background queue when subscribing with a login.
+        context.performAndWait {
+            do {
+                let user = getUser(baseUrl: baseUrl) ?? User(context: context)
+                user.baseUrl = normalizeBaseUrl(baseUrl)
+                user.username = username
+                user.password = password
+                try context.save()
+            } catch let error {
+                Log.w(Store.tag, "Cannot store user", error)
+                rollbackAndRefresh()
+            }
         }
     }
     

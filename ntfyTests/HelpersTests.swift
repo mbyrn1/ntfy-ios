@@ -17,9 +17,12 @@ struct HelpersTests {
         #expect(topicAuthUrl(baseUrl: "https://ntfy.sh", topic: "alerts") == "https://ntfy.sh/alerts/auth")
     }
 
-    @Test func topicShortUrlStripsScheme() {
-        #expect(topicShortUrl(baseUrl: "https://ntfy.sh", topic: "alerts") == "ntfy.sh/alerts")
-        #expect(topicShortUrl(baseUrl: "http://10.0.0.1:8080", topic: "x") == "10.0.0.1:8080/x")
+    @Test(arguments: [
+        ("https://ntfy.sh", "alerts", "ntfy.sh/alerts"),
+        ("http://10.0.0.1:8080", "x", "10.0.0.1:8080/x")
+    ])
+    func topicShortUrlStripsScheme(baseUrl: String, topic: String, expected: String) {
+        #expect(topicShortUrl(baseUrl: baseUrl, topic: topic) == expected)
     }
 
     @Test func topicHashIsStableSha256OfTopicUrl() {
@@ -39,10 +42,13 @@ struct HelpersTests {
         #expect(firebaseTopic(baseUrl: selfHosted, topic: "alerts") == topicHash(baseUrl: selfHosted, topic: "alerts"))
     }
 
-    @Test func parseAllTagsDropsBlankEntries() {
-        #expect(parseAllTags("a,b, ,,c") == ["a", "b", "c"])
-        #expect(parseAllTags("") == [])
-        #expect(parseAllTags(nil) == [])
+    @Test(arguments: [
+        ("a,b, ,,c", ["a", "b", "c"]),
+        ("", []),
+        (nil, [])
+    ] as [(String?, [String])])
+    func parseAllTagsDropsBlankEntries(input: String?, expected: [String]) {
+        #expect(parseAllTags(input) == expected)
     }
 
     @Test func emojiTagsAreSplitFromPlainTags() {

@@ -19,7 +19,8 @@ struct SubscriptionManager {
             }
         }
         let subscription = store.saveSubscription(baseUrl: normalizedBaseUrl, topic: topic)
-        poll(subscription)
+        // Callers run this on a background queue, but the subscription belongs to the main-queue context.
+        store.context.perform { poll(subscription) }
     }
     
     func unsubscribe(_ subscription: Subscription) {
