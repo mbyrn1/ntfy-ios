@@ -1,4 +1,4 @@
-# SwiftLint config. Lenient first pass: existing (upstream) code produces warnings only,
+# SwiftLint config. Lenient first pass: existing code produces warnings only,
 # so CI fails solely on new error-level violations. Tighten rules over time.
 included:
   - ntfy
@@ -6,10 +6,10 @@ included:
   - ntfyTests
 
 disabled_rules:
-  - trailing_whitespace   # pervasive in upstream code; fixing it would make upstream merges painful
+  - trailing_whitespace   # pervasive in existing code; fixing it would touch most files
   - todo
 
-# Pre-existing violations in upstream code, downgraded from error to warning.
+# Existing violations, downgraded from error to warning.
 force_cast: warning
 shorthand_operator: warning
 attribute_name_spacing: warning

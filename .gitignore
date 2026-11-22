@@ -3,8 +3,6 @@ GoogleService-Info.plist
 ntfy.xcodeproj/xcuserdata
 ntfy.xcodeproj/project.xcworkspace/xcuserdata/
 
-# Local / personal
-.claude/settings.local.json
 DerivedData/
 build/
 *.xcuserstate
