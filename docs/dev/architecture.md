@@ -96,16 +96,20 @@ message ID. If the NSE can't fetch the message in time, iOS shows the push as se
 ## 4. Event types
 
 `server/server_firebase.go` (`toFirebaseMessage`), `ntfy/App/AppDelegate.swift`
-(`application(_:didReceiveRemoteNotification:fetchCompletionHandler:)`)
+(`didReceiveRemoteNotification`)
 
-| Event | Push type | Handled by |
-|---|---|---|
-| `message` | alert (`mutable-content`) | NSE: save and display |
-| `poll_request` | alert (`mutable-content`) | NSE: fetch from the server, save and display |
-| `message_delete`, `message_clear` | background (`content-available`) | app delegate; ignored unless the topic is `~poll` |
-| `keepalive` on `~poll` | background | app delegate: poll all subscriptions. The server doesn't currently send it (commented out in `runFirebaseKeepaliver`, `server/server.go`) |
+**Alert pushes** show a notification. The NSE runs first and can change it.
 
-Background pushes don't run the NSE.
+- `message`: the NSE saves it and displays it.
+- `poll_request`: the NSE fetches the message from the server, saves it and displays it.
+
+**Background pushes** (`content-available`) are currently no-ops on iOS. They don't run the NSE, and the app delegate
+drops any push whose topic isn't `~poll`.
+
+- `message_delete`, `message_clear`: sent on the subscribed topic, so the app ignores them. A message deleted or
+  cleared on the server stays on the phone.
+- `keepalive` on `~poll`: the app would poll every subscription, but the server doesn't send it (commented out in
+  `runFirebaseKeepaliver`, `server/server.go`).
 
 ## Payload limits
 
