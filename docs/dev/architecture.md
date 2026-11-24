@@ -1,9 +1,11 @@
-# How a notification reaches the iOS app
+# Architecture
+
+## How a Ntfy notification reaches the iOS app
 
 How messages travel from an ntfy server to the iOS app and its Notification Service Extension (NSE). Code
-references are to files and functions in this repo (`ntfy-ios`) and the server repo (`ntfy`).
+references files and functions in this repo (`ntfy-ios`) and the server repo (`ntfy`).
 
-## Who knows what
+## Who knows what (in the IOS Flow)
 
 | Component | Knows | Doesn't know |
 |---|---|---|
@@ -42,7 +44,7 @@ sequenceDiagram
 `sha256("<baseUrl>/<topic>")` for any other server. Topics are subscribed in `didReceiveRegistrationToken`; a failed
 subscribe is logged.
 
-## 2. Message on the home server: content is in the push
+## 2. Message on the home(ntfy.sh) server: content is in the push
 
 `server/server_firebase.go` (`toFirebaseMessage`, `createAPNSAlertConfig`), `ntfyNSE/NotificationService.swift`
 
