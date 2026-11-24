@@ -7,7 +7,8 @@ references are to files and functions in this repo (`ntfy-ios`) and the server r
 
 | Component | Knows | Doesn't know |
 |---|---|---|
-| **ntfy server** (ntfy.sh or self-hosted) | topics and messages | which devices listen; it sends to an FCM topic |
+| **ntfy.sh** | topics and messages | which devices listen; it sends to an FCM topic |
+| **Self-hosted server** | topics and messages | which devices listen; it forwards a poll request to its `upstream-base-url` (ntfy.sh) |
 | **FCM** (Firebase Cloud Messaging) | which device tokens subscribe to each FCM topic | message meaning |
 | **APNs** (Apple Push Notification service) | device tokens | topics |
 | **iOS app** (`ntfy` target) | subscriptions (Core Data), polling, UI | |
