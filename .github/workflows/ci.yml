@@ -40,7 +40,7 @@ jobs:
   test:
     needs: lint
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 20
     env:
       # Ad-hoc signing keeps entitlements (the app group the Store needs) on the
       # simulator without requiring an Apple developer account.

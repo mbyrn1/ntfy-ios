@@ -19,7 +19,7 @@ struct SubscriptionManager {
             }
         }
         let subscription = store.saveSubscription(baseUrl: normalizedBaseUrl, topic: topic)
-        // Callers run this on a background queue, but the subscription belongs to the main-queue context.
+        // subscribe() runs on a background queue; a Subscription can only be read on its context's (main) queue.
         store.context.perform { poll(subscription) }
     }
     
